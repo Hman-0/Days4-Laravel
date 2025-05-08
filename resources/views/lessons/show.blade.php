@@ -43,23 +43,58 @@
                         @foreach($lesson->comments as $comment)
                             <div class="card mb-2">
                                 <div class="card-body">
-                                    <div class="d-flex justify-content-between">
-                                        <h6 class="card-subtitle mb-2 text-muted">{{ $comment->user->name }}</h6>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <p class="card-text mb-1">{{ $comment->content }}</p>
+                                            <small class="text-muted">Bởi {{ $comment->user->name }}</small>
+                                        </div>
                                         @if($comment->user_id === Auth::id())
-                                            <form action="{{ route('comments.destroy', $comment) }}" method="POST" class="d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-danger" 
-                                                        onclick="return confirm('Bạn có chắc muốn xóa bình luận này?')">
-                                                    Xóa
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-sm btn-primary me-2" 
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#editCommentModal{{ $comment->id }}">
+                                                    <i class="fas fa-edit"></i> Sửa
                                                 </button>
-                                            </form>
+                                                <form action="{{ route('comments.destroy', $comment) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-danger" 
+                                                            onclick="return confirm('Bạn có chắc muốn xóa bình luận này?')">
+                                                        <i class="fas fa-trash"></i> Xóa
+                                                    </button>
+                                                </form>
+                                            </div>
                                         @endif
                                     </div>
-                                    <p class="card-text">{{ $comment->content }}</p>
-                                    <small class="text-muted">{{ $comment->created_at->diffForHumans() }}</small>
                                 </div>
                             </div>
+
+                            <!-- Modal Sửa bình luận -->
+                            @if($comment->user_id === Auth::id())
+                                <div class="modal fade" id="editCommentModal{{ $comment->id }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Sửa bình luận</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <form action="{{ route('comments.update', $comment) }}" method="POST">
+                                                @csrf
+                                                @method('PUT')
+                                                <div class="modal-body">
+                                                    <div class="mb-3">
+                                                        <textarea name="content" class="form-control" rows="3">{{ $comment->content }}</textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
                         @endforeach
                     </div>
                 </div>
