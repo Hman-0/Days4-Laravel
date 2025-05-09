@@ -72,7 +72,55 @@
                 @endforeach
             </div>
 
-           
+            <div class="card border-0 shadow-sm mt-5">
+                <div class="card-body">
+                    <h3 class="fw-bold mb-4">Bình luận</h3>
+                    
+                    @auth
+                    <form action="{{ route('comments.store') }}" method="POST" class="mb-5">
+                        @csrf
+                        <input type="hidden" name="commentable_id" value="{{ $course->id }}">
+                        <input type="hidden" name="commentable_type" value="App\Models\Course">
+                        <div class="mb-3">
+                            <textarea name="content" 
+                                      class="form-control @error('content') is-invalid @enderror" 
+                                      rows="4" 
+                                      placeholder="Viết bình luận của bạn..."></textarea>
+                            @error('content')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4">
+                            <i class="fas fa-paper-plane me-2"></i>Gửi bình luận
+                        </button>
+                    </form>
+                    @endauth
+
+                    <div class="comment-section">
+                        @foreach($course->comments as $comment)
+                        <div class="d-flex mb-4">
+                            <img src="{{ $comment->user->profile->avatar_url }}" 
+                                 class="rounded-circle me-3" 
+                                 width="40" 
+                                 alt="{{ $comment->user->name }}">
+                            <div class="flex-grow-1">
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-body">
+                                        <h6 class="card-title fw-medium mb-1">
+                                            {{ $comment->user->name }}
+                                            <small class="text-muted ms-2">{{ $comment->created_at->diffForHumans() }}</small>
+                                        </h6>
+                                        <p class="card-text mb-0">{{ $comment->content }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
             </div>
         </div>
     </div>
