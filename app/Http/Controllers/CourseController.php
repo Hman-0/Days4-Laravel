@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Course;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CourseController extends Controller
 {
@@ -37,15 +38,14 @@ class CourseController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'required|string',
+            'description' => 'required|string'
         ]);
-
-        $course = Course::create([
-            'title' => $validated['title'],
-            'description' => $validated['description'],
-            'user_id' => 1, // Tạm thời gán user_id = 1
-        ]);
-
+    
+        // Get authenticated user
+        $user = Auth::user();
+        
+        $course = $user->courses()->create($validated);
+    
         return redirect()->route('courses.show', $course)
             ->with('success', 'Khóa học đã được tạo thành công');
     }
