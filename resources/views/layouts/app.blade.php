@@ -34,16 +34,6 @@
                 <span class="nav-brand-gradient">EduHub</span>
             </a>
             
-          
-            <div class="collapse navbar-collapse" id="mainNav">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link text-white hover-scale" href="">
-                            <i class="fas fa-book-open me-2"></i>Khóa học
-                        </a>
-                    </li>
-                </ul>
-
                 <ul class="navbar-nav ms-auto gap-3">
                     @guest
                         <li class="nav-item">
