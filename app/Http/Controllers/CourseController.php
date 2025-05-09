@@ -7,12 +7,18 @@ use Illuminate\Http\Request;
 
 class CourseController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $courses = Course::with(['user', 'lessons.tags'])
+        $query = $request->input('q');
+        
+        $courses = Course::when($query, function($q) use ($query) {
+                return $q->where('title', 'like', "%{$query}%")
+                       ->orWhere('description', 'like', "%{$query}%");
+            })
             ->withCount(['lessons', 'comments'])
+            ->latest()
             ->get();
-
+    
         return view('courses.index', compact('courses'));
     }
 

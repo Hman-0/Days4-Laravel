@@ -10,36 +10,36 @@ class ProfileController extends Controller
 {
     public function show()
     {
-        $user = User::with('profile')->first();
+        $profile = User::with('profile')->first();
         
-        if (!$user) {
-            $user = User::create([
+        if (!$profile) {
+            $profile = User::create([
                 'name' => 'Test User',
                 'email' => 'test@example.com',
                 'password' => bcrypt('password'),
             ]);
             
-            $user->profile()->create([
+            $profile->profile()->create([
                 'bio' => 'Test bio',
                 'birthday' => '1990-01-01',
                 'avatar_url' => 'https://via.placeholder.com/150'
             ]);
             
-            $user->load('profile');
+            $profile->load('profile');
         }
 
-        return view('profile.show', compact('user'));
+        return view('profiles.show', compact('profile'));
     }
 
     public function edit()
     {
-        $user = User::with('profile')->first();
-        return view('profile.edit', compact('user'));
+        $profile = User::with('profile')->first();
+        return view('profiles.edit', compact('profile'));
     }
 
     public function update(Request $request)
     {
-        $user = User::first();
+        $profile = User::first();
         
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -48,12 +48,12 @@ class ProfileController extends Controller
             'avatar_url' => 'nullable|url|max:255',
         ]);
 
-        $user->update([
+        $profile->update([
             'name' => $validated['name']
         ]);
 
-        $user->profile()->updateOrCreate(
-            ['user_id' => $user->id],
+        $profile->profile()->updateOrCreate(
+            ['user_id' => $profile->id],
             [
                 'bio' => $validated['bio'],
                 'birthday' => $validated['birthday'],
