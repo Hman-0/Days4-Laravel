@@ -5,62 +5,54 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
-    public function show()
+    public function show(User $user)
     {
-        $profile = User::with('profile')->first();
-        
-        if (!$profile) {
-            $profile = User::create([
-                'name' => 'Test User',
-                'email' => 'test@example.com',
-                'password' => bcrypt('password'),
-            ]);
-            
-            $profile->profile()->create([
-                'bio' => 'Test bio',
-                'birthday' => '1990-01-01',
-                'avatar_url' => 'https://via.placeholder.com/150'
-            ]);
-            
-            $profile->load('profile');
-        }
-
-        return view('profiles.show', compact('profile'));
+        $profile = $user->load('profile')->profile;
+        return view('profiles.show', compact('user', 'profile'));
+    }
+    
+    public function edit(User $user)
+    {
+        $user->loadMissing('profile');
+        return view('profiles.edit', compact('user'));
     }
 
-    public function edit()
+    public function update(Request $request, User $user)
     {
-        $profile = User::with('profile')->first();
-        return view('profiles.edit', compact('profile'));
-    }
-
-    public function update(Request $request)
-    {
-        $profile = User::first();
-        
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'student_id' => 'nullable|string|max:20',
             'bio' => 'nullable|string|max:1000',
             'birthday' => 'nullable|date',
-            'avatar_url' => 'nullable|url|max:255',
+            'avatar' => 'nullable|image|max:2048'
         ]);
 
-        $profile->update([
-            'name' => $validated['name']
-        ]);
+        // Cập nhật thông tin user
+        $user->update(['name' => $validated['name']]);
 
-        $profile->profile()->updateOrCreate(
-            ['user_id' => $profile->id],
+        // Xử lý upload avatar
+        $avatarUrl = $user->profile->avatar_url ?? null;
+        if ($request->hasFile('avatar')) {
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $avatarUrl = Storage::url($path);
+        }
+
+        // Cập nhật profile
+        $user->profile()->updateOrCreate(
+            ['user_id' => $user->id],
             [
+                'student_id' => $validated['student_id'],
                 'bio' => $validated['bio'],
                 'birthday' => $validated['birthday'],
-                'avatar_url' => $validated['avatar_url'],
+                'avatar_url' => $avatarUrl
             ]
         );
 
-        return redirect()->route('profile')->with('success', 'Profile updated successfully');
+        return redirect()->route('profile.show', $user)
+            ->with('success', 'Cập nhật thông tin thành công');
     }
 }
